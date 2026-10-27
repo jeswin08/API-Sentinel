@@ -1,10 +1,11 @@
 # API Sentinel
 
-> An API monitoring platform — **Phase 1: Foundation**
+> An API monitoring platform — **Phase 2: Database Setup**
 
 ## Prerequisites
 
-- Python 3.11+ (ships with macOS or install via [Homebrew](https://brew.sh))
+- Python 3.11+
+- PostgreSQL 16+
 - Git
 
 ## Quick Start
@@ -22,9 +23,16 @@ pip install -r backend/requirements.txt
 
 # 4. Create your .env from the template
 cp backend/.env.example backend/.env
+# Edit backend/.env with your database credentials
 
-# 5. Start the development server
-uvicorn backend.app.main:app --reload
+# 5. Run database migrations
+cd backend
+alembic upgrade head
+cd ..
+
+# 6. Start the development server
+cd backend
+uvicorn app.main:app --reload
 ```
 
 The server starts at **http://127.0.0.1:8000**.
@@ -42,14 +50,36 @@ The server starts at **http://127.0.0.1:8000**.
 ```text
 api-sentinel/
 ├── backend/
+│   ├── alembic/                 # Alembic migration scripts
+│   │   ├── versions/            # Auto-generated migration files
+│   │   └── env.py               # Alembic environment config
 │   ├── app/
-│   │   └── main.py          # FastAPI application
-│   ├── requirements.txt     # Python dependencies
-│   ├── .env.example          # Environment template
-│   └── .env                  # Local secrets (git-ignored)
+│   │   ├── core/
+│   │   │   ├── config.py        # Environment-based settings
+│   │   │   └── database.py      # Async SQLAlchemy engine & session
+│   │   ├── models/
+│   │   │   ├── base.py          # Declarative base class
+│   │   │   ├── user.py          # User model
+│   │   │   ├── endpoint.py      # MonitoredEndpoint model
+│   │   │   ├── check_result.py  # CheckResult model
+│   │   │   └── incident.py      # Incident model
+│   │   └── main.py              # FastAPI application
+│   ├── alembic.ini              # Alembic configuration
+│   ├── requirements.txt         # Python dependencies
+│   ├── .env.example             # Environment template
+│   └── .env                     # Local secrets (git-ignored)
 ├── .gitignore
 └── README.md
 ```
+
+## Database Models
+
+| Table                | Description                        |
+|----------------------|------------------------------------|
+| `users`              | Registered user accounts           |
+| `monitored_endpoints`| API URLs being monitored           |
+| `check_results`      | Individual health-check results    |
+| `incidents`          | Downtime windows for endpoints     |
 
 ## License
 
